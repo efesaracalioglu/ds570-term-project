@@ -2,7 +2,6 @@ import pandas as pd
 
 TARGET = "PitNextLap"
 
-# Canonical column names after renaming
 COL = {
     "lap":       "LapNumber",
     "driver":    "Driver",
@@ -14,7 +13,6 @@ COL = {
     "race":      "Race",
     "year":      "Year",
     "target":    TARGET,
-    # pre-computed features already in the dataset
     "lt_delta":         "LapTime_Delta",
     "cum_degradation":  "Cumulative_Degradation",
     "race_progress":    "RaceProgress",

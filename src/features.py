@@ -16,6 +16,7 @@ FEATURE_COLS = [
     "Year",
     "compound_enc",
     "tyre_age_sq",
+    "PitStop",
 ]
 
 
