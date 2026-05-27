@@ -1,50 +1,3 @@
-"""
-Model training module.
-
-Five sklearn models trained and compared:
-  1. Decision Tree       — simplest baseline; regularised via depth + min_samples
-  2. Logistic Regression — linear baseline; L2 regularisation (C parameter)
-  3. Random Forest       — ensemble; regularised via depth + min_samples + max_features
-  4. XGBoost             — primary model; L1/L2 + shrinkage + subsampling
-  5. MLP                 — deep learning (no temporal structure); 3 hidden layers,
-                           L2 via alpha, early stopping as implicit regularisation
-
-  LSTM (deep learning + time series) is trained separately in src/lstm_model.py
-  because it requires 3-D sequence input and TensorFlow.
-
-Validation strategy
--------------------
-Two complementary evaluations are used:
-
-  a) TimeSeriesSplit CV (5 folds) on the training set:
-     Gives robust, multi-fold ROC-AUC estimates while strictly respecting
-     chronological order — each fold's test window is always AFTER its train
-     window. Standard k-fold is NOT used because shuffling would allow
-     future laps/seasons to leak into training.
-
-  b) Held-out test set (last 20% of data, shuffle=False):
-     Final unbiased evaluation — never touched during CV or training.
-
-Regularisation choices
-----------------------
-  Decision Tree  : max_depth + min_samples_leaf + min_samples_split
-                   → prevents memorising tiny node splits
-  Logistic Reg.  : C=0.1  (stronger L2 than default C=1.0)
-                   → shrinks coefficients, handles correlated features
-  Random Forest  : max_depth + min_samples_leaf + max_features='sqrt'
-                   → decorrelates trees, limits tree depth
-  XGBoost        : reg_alpha (L1) + reg_lambda (L2) + gamma (min split gain)
-                   + min_child_weight + subsample + colsample_bytree
-                   → comprehensive regularisation against overfit
-  MLP            : alpha (L2 weight decay) + early_stopping
-                   Note: MLPClassifier has no class_weight param — slight
-                   disadvantage on minority class, but included for comparison.
-
-Class imbalance (~25% positive, 2.93:1):
-  DT / RF / LR : class_weight='balanced'
-  XGBoost      : scale_pos_weight = neg / pos
-  MLP          : no direct support — limitation noted
-"""
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -84,8 +37,8 @@ def cv_score(model, X_train, y_train) -> dict:
 def build_decision_tree(X_train, y_train) -> DecisionTreeClassifier:
     model = DecisionTreeClassifier(
         max_depth=6,
-        min_samples_leaf=50,    # node must have ≥50 samples — prevents micro-splits
-        min_samples_split=100,  # split only if node has ≥100 samples
+        min_samples_leaf=50,
+        min_samples_split=100,
         class_weight="balanced",
         random_state=42,
     )
@@ -97,7 +50,7 @@ def build_logistic_regression(X_train, y_train) -> Pipeline:
     pipe = Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LogisticRegression(
-            C=0.1,                  # stronger L2 than default (C=1.0)
+            C=0.1,
             class_weight="balanced",
             max_iter=1_000,
             random_state=42,
@@ -111,8 +64,8 @@ def build_random_forest(X_train, y_train) -> RandomForestClassifier:
     model = RandomForestClassifier(
         n_estimators=200,
         max_depth=8,
-        min_samples_leaf=20,    # each leaf needs ≥20 samples
-        max_features="sqrt",    # decorrelates trees (√14 ≈ 3-4 features per split)
+        min_samples_leaf=20,
+        max_features="sqrt",
         class_weight="balanced",
         random_state=42,
         n_jobs=-1,
