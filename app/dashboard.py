@@ -137,7 +137,7 @@ with tab1:
     cb.dataframe(null_df, use_container_width=True, hide_index=True)
 
     # data.describe()
-    st.subheader("data.describe()  —  Statistical Summary")
+    st.subheader("data.describe() - Statistical Summary")
     st.dataframe(df.describe().round(3), use_container_width=True)
 
     # value_counts()
@@ -146,19 +146,19 @@ with tab1:
     vc_compound = df[compound_col].value_counts().reset_index()
     vc_compound.columns = ["Compound", "Count"]
     vc_compound["% of Laps"] = (vc_compound["Count"] / len(df) * 100).round(2)
-    vc1.subheader(f"value_counts()  —  {compound_col}")
+    vc1.subheader(f"value_counts() - {compound_col}")
     vc1.dataframe(vc_compound, use_container_width=True, hide_index=True)
 
     vc_year = df[year_col].value_counts().sort_index().reset_index()
     vc_year.columns = [year_col, "Count"]
     vc_year["% of Laps"] = (vc_year["Count"] / len(df) * 100).round(2)
-    vc2.subheader(f"value_counts()  —  {year_col}")
+    vc2.subheader(f"value_counts() - {year_col}")
     vc2.dataframe(vc_year, use_container_width=True, hide_index=True)
 
     vc_target = df[target_col].value_counts().sort_index().reset_index()
     vc_target.columns = [target_col, "Count"]
     vc_target["% of Laps"] = (vc_target["Count"] / len(df) * 100).round(2)
-    vc3.subheader(f"value_counts()  —  {target_col}")
+    vc3.subheader(f"value_counts() - {target_col}")
     vc3.dataframe(vc_target, use_container_width=True, hide_index=True)
 
     st.divider()
@@ -186,7 +186,7 @@ with tab1:
     ))
     fig_target.update_layout(
         yaxis_title="Number of Laps",
-        **_dark_layout("Target Variable Distribution — PitNextLap (Class Imbalance)"),
+        **_dark_layout("Target Variable Distribution - PitNextLap (Class Imbalance)"),
     )
     st.plotly_chart(fig_target, use_container_width=True)
 
@@ -348,7 +348,7 @@ with tab2:
                                   line=dict(color="#555", dash="dash")))
     fig_roc.update_layout(xaxis_title="False Positive Rate",
                            yaxis_title="True Positive Rate",
-                           **_dark_layout("ROC Curves — All Models"))
+                           **_dark_layout("ROC Curves - All Models"))
     ca.plotly_chart(fig_roc, use_container_width=True)
 
     fig_pr = go.Figure()
@@ -363,7 +363,7 @@ with tab2:
     cb.plotly_chart(fig_pr, use_container_width=True)
 
 
-# ----------------------------
+# ---------------------------- 
 # TAB 3 - XGBoost Details
 # ----------------------------
 
@@ -380,7 +380,7 @@ with tab3:
         color_continuous_scale="Reds",
         title="Confusion Matrix — XGBoost",
     )
-    fig_cm.update_layout(**_dark_layout())
+    fig_cm.update_layout(**_dark_layout()) 
     ca.plotly_chart(fig_cm, use_container_width=True)
 
     fi_df = (pd.DataFrame({"feature": feature_cols, "importance": xgb.feature_importances_})
@@ -396,21 +396,12 @@ with tab3:
     st.subheader("Classification Report — XGBoost")
     st.code(xgb_res["classification_report"], language=None)
 
-    st.subheader("Model Limitations & Notes")
-    st.markdown("""
-- **Temporal split**: trained on earlier seasons, tested on later tail. Season regulation changes may hurt generalisation.
-- **Class imbalance**: PitNextLap rate differs between train (~23.8%) and test (~32.3%) sets — later-season race mix has proportionally more pit laps.
-- **Driver/team identity not encoded**: same tyre age and lap time can mean different pit decisions per team.
-- **Safety car / VSC periods not flagged**: these trigger opportunistic pit stops the model may misclassify.
-""")
-
-
 # ----------------------------
 # TAB 4 - Race Strategy
 # ----------------------------
 
 with tab4:
-    st.subheader("Race Strategy — Pit-Stop Probability per Lap")
+    st.subheader("Race Strategy - Pit-Stop Probability per Lap")
 
     races = sorted(df[race_col].dropna().unique())
     ca, cb = st.columns(2)
@@ -450,7 +441,7 @@ with tab4:
                       annotation_text="50% threshold")
         fig.update_layout(
             xaxis_title="Lap", yaxis_title="Probability", yaxis_range=[0, 1],
-            **_dark_layout(f"Pit-Stop Probability — {selected_driver} @ {selected_race}"),
+            **_dark_layout(f"Pit-Stop Probability - {selected_driver} @ {selected_race}"),
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
